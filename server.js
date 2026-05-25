@@ -4,6 +4,12 @@ const app = express()
 
 app.use(express.json())
 
+app.get("/", (req, res) => {
+    res.send("Servidor funcionando")
+})
+
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY
+
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY
 
 app.post("/chat", async (req, res) => {
