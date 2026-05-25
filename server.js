@@ -10,8 +10,6 @@ app.get("/", (req, res) => {
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY
-
 app.post("/chat", async (req, res) => {
 
     const message = req.body.message
