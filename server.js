@@ -33,7 +33,6 @@ app.post("/chat", async (req, res) => {
                                     text:
 `Sos una IA dentro de Roblox.
 Respondé corto.
-Amigable.
 Siempre en español.
 
 Jugador: ${message}`
@@ -46,6 +45,8 @@ Jugador: ${message}`
         )
 
         const data = await response.json()
+
+        console.log(data)
 
         const reply =
             data.candidates?.[0]?.content?.parts?.[0]?.text
@@ -60,11 +61,17 @@ Jugador: ${message}`
         console.log(err)
 
         res.status(500).json({
-            error: "Error"
+            error: "Error conectando Gemini"
         })
     }
 })
 
-app.listen(3000, () => {
-    console.log("Servidor iniciado")
+app.get("/", (req, res) => {
+    res.send("Servidor funcionando")
+})
+
+const PORT = process.env.PORT || 3000
+
+app.listen(PORT, () => {
+    console.log("Servidor iniciado en puerto " + PORT)
 })
