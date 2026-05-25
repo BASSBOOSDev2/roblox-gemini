@@ -1,17 +1,21 @@
-// server.js
 const express = require("express");
 const app = express();
 app.use(express.json());
 
-const CLAUDE_API_KEY = process.env.CLAUDE_API_KEY; // Variable de entorno, nunca hardcodeada
+// FIX: fetch compatible en cualquier Node
+const fetch = (...args) =>
+  import("node-fetch").then(({ default: fetch }) => fetch(...args));
+
+const CLAUDE_API_KEY = process.env.CLAUDE_API_KEY;
 
 app.post("/chat", async (req, res) => {
     const { message, history } = req.body;
 
-    if (!message) return res.status(400).json({ error: "No message provided" });
+    if (!message) {
+        return res.status(400).json({ error: "No message provided" });
+    }
 
-    // Construir historial de mensajes
-    const messages = history || [];
+    const messages = Array.isArray(history) ? [...history] : [];
     messages.push({ role: "user", content: message });
 
     try {
@@ -25,18 +29,30 @@ app.post("/chat", async (req, res) => {
             body: JSON.stringify({
                 model: "claude-sonnet-4-20250514",
                 max_tokens: 300,
-                system: "Sos un asistente dentro de un juego de Roblox. Respondé siempre en español, de forma corta y amigable. Nunca rompas el personaje.",
+                system: "Sos una IA dentro de Roblox. Respondé corto, amigable y en español. Nunca rompas el personaje.",
                 messages: messages
             })
         });
 
         const data = await response.json();
-        const reply = data.content[0].text;
 
-        res.json({ reply, messages: [...messages, { role: "assistant", content: reply }] });
+        const reply =
+            data?.content?.[0]?.text ||
+            "No pude responder.";
+
+        const updatedHistory = [
+            ...messages,
+            { role: "assistant", content: reply }
+        ].slice(-10);
+
+        return res.json({
+            reply,
+            messages: updatedHistory
+        });
 
     } catch (err) {
-        res.status(500).json({ error: "Error contactando Claude" });
+        console.log(err);
+        return res.status(500).json({ error: "Error contactando Claude" });
     }
 });
 
